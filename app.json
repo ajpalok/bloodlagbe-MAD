@@ -38,6 +38,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "রক্তের পোস্টে হাসপাতালের অবস্থান পিন করতে আপনার অবস্থান প্রয়োজন।"
+        }
       ]
     ],
     "experiments": {

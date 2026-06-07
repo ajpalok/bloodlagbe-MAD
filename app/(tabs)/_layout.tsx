@@ -1,35 +1,26 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Colors } from '@/theme/colors';
+import { useSettingsStore, t } from '@/store/settingsStore';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { locale } = useSettingsStore();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+        tabBarStyle: { backgroundColor: Colors.surface, borderTopColor: Colors.surfaceBorder, borderTopWidth: 1 },
+        tabBarActiveTintColor: Colors.crimson,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: t('home', locale), tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} /> }} />
+      <Tabs.Screen name="requests" options={{ title: t('myRequests', locale), tabBarIcon: ({ color, size }) => <MaterialIcons name="list-alt" size={size} color={color} /> }} />
+      <Tabs.Screen name="donate" options={{ title: t('donate', locale), tabBarIcon: ({ color, size }) => <MaterialIcons name="volunteer-activism" size={size} color={color} /> }} />
+      <Tabs.Screen name="profile" options={{ title: t('profile', locale), tabBarIcon: ({ color, size }) => <MaterialIcons name="person" size={size} color={color} /> }} />
     </Tabs>
   );
 }
