@@ -11,10 +11,34 @@ interface BloodRequestCardProps {
   request: BloodRequestItem;
   onCollect?: (id: number) => void;
   showCollect?: boolean;
-  /** Override the default navigation handler — used by callers that want to
-   *  pre-populate the React Query detail cache before pushing the route. */
   onPress?: (request: BloodRequestItem) => void;
 }
+
+function BagDots({ remaining, needed }: { remaining: number; needed: number }) {
+  const total = Math.min(needed, 10);
+  const filled = Math.min(remaining, total);
+  return (
+    <View style={dots.row}>
+      {Array.from({ length: total }).map((_, i) => (
+        <View
+          key={i}
+          style={[dots.dot, i < filled ? dots.filled : dots.empty]}
+        />
+      ))}
+      <Text style={dots.label}>
+        {remaining}/{needed} ব্যাগ বাকি
+      </Text>
+    </View>
+  );
+}
+
+const dots = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  filled: { backgroundColor: Colors.crimson },
+  empty: { backgroundColor: Colors.surfaceBorder },
+  label: { color: Colors.textMuted, fontSize: 11, marginLeft: 6, fontWeight: '500' },
+});
 
 export function BloodRequestCard({ request, onCollect, showCollect, onPress }: BloodRequestCardProps) {
   const isActive = request.blood_bags_remaining > 0;
@@ -28,25 +52,40 @@ export function BloodRequestCard({ request, onCollect, showCollect, onPress }: B
   }
 
   return (
-    <Pressable onPress={handlePress}>
+    <Pressable
+      onPress={handlePress}
+      style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
+    >
       <Card style={styles.card}>
-        <View style={styles.header}>
-          <BloodGroupBadge group={request.blood_group} />
-          <View style={styles.headerRight}>
-            {request.is_urgent && <Badge label="🚨 জরুরি" variant="crimson" />}
-            {!isActive && <Badge label="✓ পূর্ণ" variant="success" />}
+        {/* Main row: blood group badge + content */}
+        <View style={styles.mainRow}>
+          <BloodGroupBadge group={request.blood_group} size="lg" />
+
+          <View style={styles.content}>
+            {/* Status row */}
+            <View style={styles.statusRow}>
+              {request.is_urgent && <Badge label="🚨 জরুরি" variant="crimson" />}
+              {!isActive && <Badge label="✓ পূর্ণ" variant="success" />}
+            </View>
+
+            <Text style={styles.hospital} numberOfLines={2}>
+              {request.hospital_name}
+            </Text>
+
+            {(request.district || request.division) && (
+              <Text style={styles.location} numberOfLines={1}>
+                📍 {[request.district, request.division].filter(Boolean).join(', ')}
+              </Text>
+            )}
           </View>
         </View>
 
-        <Text style={styles.hospital} numberOfLines={1}>{request.hospital_name}</Text>
-        {(request.district || request.division) && (
-          <Text style={styles.location}>{[request.district, request.division].filter(Boolean).join(', ')}</Text>
-        )}
-
+        {/* Footer row: dots progress + date */}
         <View style={styles.footer}>
-          <Text style={styles.bags}>
-            <Text style={styles.bagsNum}>{request.blood_bags_remaining}</Text>/{request.blood_bags_needed} ব্যাগ বাকি
-          </Text>
+          <BagDots
+            remaining={request.blood_bags_remaining}
+            needed={request.blood_bags_needed}
+          />
           {request.blood_need_time && (
             <Text style={styles.needTime}>
               {new Date(request.blood_need_time).toLocaleDateString('bn-BD')}
@@ -55,7 +94,10 @@ export function BloodRequestCard({ request, onCollect, showCollect, onPress }: B
         </View>
 
         {showCollect && isActive && onCollect && (
-          <Pressable style={styles.collectBtn} onPress={(e) => { e.stopPropagation?.(); onCollect(request.id); }}>
+          <Pressable
+            style={styles.collectBtn}
+            onPress={(e) => { e.stopPropagation?.(); onCollect(request.id); }}
+          >
             <Text style={styles.collectText}>১ ব্যাগ পেয়েছি</Text>
           </Pressable>
         )}
@@ -65,15 +107,51 @@ export function BloodRequestCard({ request, onCollect, showCollect, onPress }: B
 }
 
 const styles = StyleSheet.create({
-  card: { marginBottom: 12 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-  headerRight: { flexDirection: 'row', gap: 6 },
-  hospital: { color: Colors.textPrimary, fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  location: { color: Colors.textSecondary, fontSize: 13, marginBottom: 10 },
-  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  bags: { color: Colors.textSecondary, fontSize: 13 },
-  bagsNum: { color: Colors.crimson, fontWeight: '700' },
-  needTime: { color: Colors.textMuted, fontSize: 12 },
-  collectBtn: { marginTop: 12, backgroundColor: Colors.crimson, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
-  collectText: { color: Colors.white, fontWeight: '600', fontSize: 14 },
+  pressable: { marginBottom: 12 },
+  pressed: { opacity: 0.88 },
+  card: { padding: 14 },
+
+  mainRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 14,
+    marginBottom: 14,
+  },
+  content: { flex: 1, gap: 4 },
+
+  statusRow: { flexDirection: 'row', gap: 6, marginBottom: 2 },
+
+  hospital: {
+    color: Colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  location: {
+    color: Colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.surfaceBorder,
+  },
+  needTime: {
+    color: Colors.textMuted,
+    fontSize: 11,
+  },
+
+  collectBtn: {
+    marginTop: 12,
+    backgroundColor: Colors.crimson,
+    borderRadius: 10,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  collectText: { color: Colors.white, fontWeight: '700', fontSize: 14, letterSpacing: 0.3 },
 });

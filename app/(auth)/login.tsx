@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import {
@@ -27,8 +28,6 @@ export default function LoginScreen() {
   const [deviceState, setDeviceState] = useState<DeviceState>('checking');
   const { locale } = useSettingsStore();
 
-  // On mount, verify the device token is present.
-  // If not, re-attempt identification before the user can try to log in.
   useEffect(() => {
     checkDeviceToken();
   }, []);
@@ -40,7 +39,6 @@ export default function LoginScreen() {
       setDeviceState('ready');
       return;
     }
-    // No token stored — try to identify now
     setDeviceState('retrying');
     const ok = await identifyDevice();
     setDeviceState(ok ? 'ready' : 'failed');
@@ -56,7 +54,6 @@ export default function LoginScreen() {
     const trimmed = contact.trim();
     if (!trimmed) return;
 
-    // If device identification hasn't succeeded yet, try one more time
     if (deviceState !== 'ready') {
       setDeviceState('retrying');
       const ok = await identifyDevice();
@@ -84,24 +81,18 @@ export default function LoginScreen() {
       });
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
-
       let msg = 'কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।';
-
       if (axiosErr?.message?.includes('Device token not found')) {
-        // This shouldn't happen since we checked above, but handle gracefully
         msg = 'ডিভাইস শনাক্তকরণ ব্যর্থ হয়েছে। অ্যাপটি পুনরায় চালু করুন।';
         setDeviceState('failed');
       } else {
         msg = axiosErr?.response?.data?.message ?? msg;
       }
-
       Alert.alert('ত্রুটি', msg);
     } finally {
       setLoading(false);
     }
   }
-
-  // ── Device status banner ─────────────────────────────────────────────────────
 
   function renderDeviceBanner() {
     if (deviceState === 'ready') return null;
@@ -133,18 +124,23 @@ export default function LoginScreen() {
     return null;
   }
 
-  const isDeviceReady = deviceState === 'ready';
-
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-          {/* Brand */}
-          <View style={styles.brand}>
-            <Text style={styles.drop}>🩸</Text>
-            <Text style={styles.title}>ব্লাড লাগবে</Text>
-            <Text style={styles.subtitle}>রক্তের জন্য সংযোগ</Text>
+          {/* Brand hero */}
+          <View style={styles.hero}>
+            <View style={styles.logoWrap}>
+              <Image
+                source={require('../../assets/images/logo.png')}
+                style={styles.logoImg}
+                contentFit="contain"
+              />
+            </View>
+            <Text style={styles.heroTitle}>Blood Lagbe</Text>
+            <Text style={styles.heroTitleBn}>ব্লাড লাগবে</Text>
+            <Text style={styles.heroTagline}>রক্তের জন্য সংযোগ</Text>
           </View>
 
           {/* Device status banner */}
@@ -154,7 +150,7 @@ export default function LoginScreen() {
           <View style={styles.form}>
             <Text style={styles.heading}>লগইন / নিবন্ধন</Text>
             <Text style={styles.desc}>
-              ফোন নম্বর অথবা ইমেইল দিন, আপনার কাছে একটি OTP পাঠানো হবে।
+              ফোন নম্বর অথবা ইমেইল দিন — আপনার কাছে একটি OTP পাঠানো হবে।
             </Text>
             <Input
               label="ফোন নম্বর / ইমেইল"
@@ -184,22 +180,49 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe:      { flex: 1, backgroundColor: Colors.darkBg },
-  flex:      { flex: 1 },
+  safe: { flex: 1, backgroundColor: Colors.darkBg },
+  flex: { flex: 1 },
   container: { flexGrow: 1, padding: 24, justifyContent: 'center' },
 
-  // Brand
-  brand:    { alignItems: 'center', marginBottom: 32 },
-  drop:     { fontSize: 56, marginBottom: 12 },
-  title:    { color: Colors.crimson, fontSize: 32, fontWeight: '700', letterSpacing: 0.5 },
-  subtitle: { color: Colors.gold, fontSize: 14, marginTop: 6 },
+  // Brand hero
+  hero: { alignItems: 'center', marginBottom: 36 },
+  logoWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 22,
+    overflow: 'hidden',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,71,73,0.30)',
+  },
+  logoImg: { width: 80, height: 80 },
+  heroTitle: {
+    color: Colors.textPrimary,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    lineHeight: 32,
+  },
+  heroTitleBn: {
+    color: Colors.crimson,
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 2,
+    lineHeight: 24,
+  },
+  heroTagline: {
+    color: Colors.gold,
+    fontSize: 13,
+    marginTop: 6,
+    letterSpacing: 0.4,
+  },
 
-  // Device status banners
+  // Device banners
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceElevated,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
@@ -207,8 +230,8 @@ const styles = StyleSheet.create({
   },
   bannerText: { color: Colors.gold, fontSize: 13, flex: 1 },
   bannerError: {
-    borderColor: `${Colors.crimson}55`,
-    backgroundColor: `${Colors.crimson}11`,
+    borderColor: 'rgba(255,71,73,0.35)',
+    backgroundColor: Colors.crimsonSubtle,
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: 8,
@@ -224,14 +247,14 @@ const styles = StyleSheet.create({
   },
   retryBtnText: { color: Colors.crimson, fontSize: 13, fontWeight: '600' },
 
-  // Form
+  // Form card
   form: {
     backgroundColor: Colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 24,
     borderWidth: 1,
     borderColor: Colors.surfaceBorder,
   },
   heading: { color: Colors.textPrimary, fontSize: 20, fontWeight: '700', marginBottom: 8 },
-  desc:    { color: Colors.textSecondary, fontSize: 13, lineHeight: 20, marginBottom: 20 },
+  desc: { color: Colors.textSecondary, fontSize: 13, lineHeight: 20, marginBottom: 20 },
 });

@@ -7,14 +7,9 @@ import { Colors } from '@/theme/colors';
 
 interface LoginGateProps {
   children: React.ReactNode;
-  /** Optional override message */
   message?: string;
 }
 
-/**
- * Wraps content that requires authentication.
- * Authenticated users see the children; unauthenticated users see an inline login prompt.
- */
 export function LoginGate({ children, message }: LoginGateProps) {
   const { isAuthenticated } = useAuthStore();
 
@@ -22,7 +17,9 @@ export function LoginGate({ children, message }: LoginGateProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.emoji}>🔐</Text>
+      <View style={styles.iconWrap}>
+        <Text style={styles.lockIcon}>🔐</Text>
+      </View>
       <Text style={styles.title}>লগইন প্রয়োজন</Text>
       <Text style={styles.desc}>
         {message ?? 'এই ফিচারটি ব্যবহার করতে আপনার অ্যাকাউন্টে লগইন করুন।'}
@@ -44,7 +41,18 @@ const styles = StyleSheet.create({
     padding: 32,
     backgroundColor: Colors.darkBg,
   },
-  emoji: { fontSize: 52, marginBottom: 18 },
+  iconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: Colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  lockIcon: { fontSize: 34 },
   title: {
     color: Colors.textPrimary,
     fontSize: 20,

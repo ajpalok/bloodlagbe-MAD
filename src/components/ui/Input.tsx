@@ -26,18 +26,24 @@ export function Input({ label, error, style, ...props }: InputProps) {
 
 const styles = StyleSheet.create({
   container: { marginBottom: 16 },
-  label: { color: Colors.textSecondary, fontSize: 13, fontWeight: '500', marginBottom: 7 },
+  label: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 8,
+    letterSpacing: 0.2,
+  },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1.5,
     borderColor: Colors.surfaceBorder,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 13,
     color: Colors.textPrimary,
     fontSize: 15,
   },
-  focused: { borderColor: Colors.crimson },
+  focused: { borderColor: Colors.crimson, backgroundColor: Colors.surface },
   errored: { borderColor: Colors.error },
   error: { color: Colors.error, fontSize: 12, marginTop: 5 },
 });

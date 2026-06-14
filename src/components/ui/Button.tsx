@@ -28,30 +28,48 @@ export function Button({ title, onPress, variant = 'primary', size = 'md', loadi
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? Colors.white : Colors.crimson} size="small" />
+        <ActivityIndicator
+          color={variant === 'primary' || variant === 'danger' ? Colors.white : Colors.crimson}
+          size="small"
+        />
       ) : (
-        <Text style={[styles.text, styles[`${variant}Text`], styles[`${size}Text`]]}>{title}</Text>
+        <Text style={[styles.text, styles[`${variant}Text`], styles[`${size}Text`]]}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: { alignItems: 'center', justifyContent: 'center', borderRadius: 10, flexDirection: 'row' },
+  base: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    flexDirection: 'row',
+  },
   primary: { backgroundColor: Colors.crimson },
-  outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: Colors.crimson },
+  outline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: Colors.crimson,
+  },
   ghost: { backgroundColor: 'transparent' },
   danger: { backgroundColor: Colors.crimsonDark },
+
   sm: { paddingHorizontal: 14, paddingVertical: 8 },
-  md: { paddingHorizontal: 20, paddingVertical: 13 },
+  md: { paddingHorizontal: 20, paddingVertical: 14 },
   lg: { paddingHorizontal: 24, paddingVertical: 16 },
-  pressed: { opacity: 0.75 },
-  disabled: { opacity: 0.45 },
-  text: { fontWeight: '600', letterSpacing: 0.3 },
+
+  pressed: { opacity: 0.78 },
+  disabled: { opacity: 0.40 },
+
+  text: { fontWeight: '700', letterSpacing: 0.3 },
   primaryText: { color: Colors.white },
   outlineText: { color: Colors.crimson },
   ghostText: { color: Colors.textSecondary },
   dangerText: { color: Colors.white },
+
   smText: { fontSize: 13 },
   mdText: { fontSize: 15 },
   lgText: { fontSize: 16 },

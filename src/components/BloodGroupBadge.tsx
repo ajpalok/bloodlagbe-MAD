@@ -7,21 +7,41 @@ interface BloodGroupBadgeProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+const SIZE_MAP = {
+  sm: { dimension: 32, fontSize: 11, borderRadius: 10 },
+  md: { dimension: 46, fontSize: 14, borderRadius: 14 },
+  lg: { dimension: 58, fontSize: 18, borderRadius: 18 },
+};
+
 export function BloodGroupBadge({ group, size = 'md' }: BloodGroupBadgeProps) {
+  const { dimension, fontSize, borderRadius } = SIZE_MAP[size];
   return (
-    <View style={[styles.badge, styles[size]]}>
-      <Text style={[styles.text, styles[`${size}Text`]]}>{group}</Text>
+    <View
+      style={[
+        styles.badge,
+        {
+          width: dimension,
+          height: dimension,
+          borderRadius,
+        },
+      ]}
+    >
+      <Text style={[styles.text, { fontSize }]} numberOfLines={1} adjustsFontSizeToFit>
+        {group}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  badge: { backgroundColor: Colors.crimsonBg, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  sm: { paddingHorizontal: 8, paddingVertical: 4 },
-  md: { paddingHorizontal: 12, paddingVertical: 8 },
-  lg: { paddingHorizontal: 18, paddingVertical: 12 },
-  text: { color: Colors.crimson, fontWeight: '700' },
-  smText: { fontSize: 12 },
-  mdText: { fontSize: 15 },
-  lgText: { fontSize: 22 },
+  badge: {
+    backgroundColor: Colors.crimson,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    color: Colors.white,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
 });

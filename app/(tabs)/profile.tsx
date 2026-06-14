@@ -850,19 +850,17 @@ const styles = StyleSheet.create({
   modalBody: { padding: 20, paddingBottom: 48 },
 
   // Avatar
-  avatarSection: { alignItems: 'center', paddingVertical: 24, gap: 10 },
+  avatarSection: { alignItems: 'center', paddingVertical: 28, gap: 12 },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.crimsonBg,
-    borderWidth: 2,
-    borderColor: Colors.crimson,
+    width: 88,
+    height: 88,
+    borderRadius: 28,
+    backgroundColor: Colors.crimson,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { color: Colors.crimson, fontSize: 32, fontWeight: '700' },
-  name: { color: Colors.textPrimary, fontSize: 22, fontWeight: '700' },
+  avatarText: { color: Colors.white, fontSize: 36, fontWeight: '800' },
+  name: { color: Colors.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: -0.3 },
 
   // Sections
   section: { marginBottom: 16 },
@@ -874,11 +872,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: Colors.gold,
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   subsectionTitle: {
     color: Colors.textSecondary,
