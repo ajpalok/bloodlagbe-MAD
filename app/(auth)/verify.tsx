@@ -15,6 +15,7 @@ import { authApi } from '@/api/auth';
 import { Button } from '@/components/ui/Button';
 import { storage } from '@/lib/storage';
 import { useAuthStore } from '@/store/authStore';
+import { useSettingsStore, t } from '@/store/settingsStore';
 import { Colors } from '@/theme/colors';
 
 export default function VerifyScreen() {
@@ -29,6 +30,7 @@ export default function VerifyScreen() {
   const [resendCooldown, setResendCooldown] = useState(60);
   const inputs = useRef<(TextInput | null)[]>([]);
   const { setAuth } = useAuthStore();
+  const { locale } = useSettingsStore();
 
   // Countdown for resend
   useEffect(() => {
@@ -113,12 +115,12 @@ export default function VerifyScreen() {
       >
         <View style={styles.container}>
           <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <Text style={styles.backText}>← ফিরে যান</Text>
+            <Text style={styles.backText}>{'<'} {t('back', locale)}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.title}>OTP যাচাই</Text>
+          <Text style={styles.title}>{t('otpVerify', locale)}</Text>
           <Text style={styles.desc}>
-            <Text style={styles.contact}>{contact}</Text> তে পাঠানো ৬ সংখ্যার OTP দিন
+            <Text style={styles.contact}>{contact}</Text>{' '}{t('otpSentTo', locale)}
           </Text>
 
           <View style={styles.otpRow}>
@@ -139,7 +141,7 @@ export default function VerifyScreen() {
             ))}
           </View>
 
-          <Button title="যাচাই করুন" onPress={handleVerify} loading={loading} disabled={!codeComplete} />
+          <Button title={t('verify', locale)} onPress={handleVerify} loading={loading} disabled={!codeComplete} />
 
           <TouchableOpacity
             onPress={handleResend}
@@ -148,8 +150,8 @@ export default function VerifyScreen() {
           >
             <Text style={[styles.resendText, resendCooldown > 0 && styles.resendDisabled]}>
               {resendCooldown > 0
-                ? `পুনরায় পাঠান (${resendCooldown}s)`
-                : 'পুনরায় OTP পাঠান'}
+                ? `${t('resendIn', locale)} (${resendCooldown}s)`
+                : t('resendOtp', locale)}
             </Text>
           </TouchableOpacity>
         </View>

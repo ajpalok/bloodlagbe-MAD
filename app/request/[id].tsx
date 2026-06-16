@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAuthStore } from '@/store/authStore';
+import { useSettingsStore, t } from '@/store/settingsStore';
 import { Colors } from '@/theme/colors';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://10.0.2.2:8000';
@@ -122,6 +123,7 @@ function OutreachModal({
 export default function RequestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isAuthenticated } = useAuthStore();
+  const { locale } = useSettingsStore();
   const qc = useQueryClient();
   const [showOutreach, setShowOutreach] = useState(false);
 
@@ -196,9 +198,9 @@ export default function RequestDetailScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>←</Text>
+          <Text style={styles.backText}>{'<'}</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>রক্তের পোস্ট</Text>
+        <Text style={styles.headerTitle}>{t('bloodPost', locale)}</Text>
         {/* Small spinner shown during background refresh (data already visible) */}
         <View style={{ width: 40, alignItems: 'center' }}>
           {isFetching && !isLoading && (

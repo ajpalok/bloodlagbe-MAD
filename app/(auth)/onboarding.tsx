@@ -372,7 +372,7 @@ export default function OnboardingScreen() {
             </View>
 
             <View style={styles.navRow}>
-              <Button title="← পিছনে" onPress={() => setStep(1)} variant="outline" style={styles.flex1} />
+              <Button title="< পিছনে" onPress={() => setStep(1)} variant="outline" style={styles.flex1} />
               <Button
                 title="পরবর্তী →"
                 onPress={handleSaveLocation}
@@ -476,7 +476,7 @@ export default function OnboardingScreen() {
             )}
 
             <View style={styles.navRow}>
-              <Button title="← পিছনে" onPress={() => setStep(3)} variant="outline" style={styles.flex1} />
+              <Button title="< পিছনে" onPress={() => setStep(3)} variant="outline" style={styles.flex1} />
               <Button
                 title="নিবন্ধন করুন"
                 onPress={handleDonorRegister}

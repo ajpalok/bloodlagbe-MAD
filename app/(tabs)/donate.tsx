@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAuthStore } from '@/store/authStore';
+import { useSettingsStore, t } from '@/store/settingsStore';
 import { Colors } from '@/theme/colors';
 import type { DonorRequestItem, DonorMatchingItem } from '@/types';
 
@@ -147,6 +148,7 @@ function MatchingRequestCard({ item }: { item: DonorMatchingItem }) {
 
 export default function DonateScreen() {
   const { user } = useAuthStore();
+  const { locale } = useSettingsStore();
   const [activeTab, setActiveTab] = useState<'inbox' | 'matching'>('inbox');
 
   // Donor inbox: direct requests
@@ -174,19 +176,17 @@ export default function DonateScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
-        <Text style={styles.pageTitle}>রক্তদান</Text>
+        <Text style={styles.pageTitle}>{t('donate', locale)}</Text>
       </View>
 
       <LoginGate message="রক্তদানের অনুরোধ দেখতে ও সাড়া দিতে লগইন করুন।">
         {!user?.is_donor ? (
           <ScrollView contentContainerStyle={styles.centerContent}>
             <Text style={styles.bigEmoji}>💉</Text>
-            <Text style={styles.emptyTitle}>আপনি ডোনার নন</Text>
-            <Text style={styles.emptyDesc}>
-              ডোনার হিসেবে নিবন্ধন করুন এবং রক্তের প্রয়োজনে মানুষকে সাহায্য করুন।
-            </Text>
+            <Text style={styles.emptyTitle}>{t('notDonor', locale)}</Text>
+            <Text style={styles.emptyDesc}>{t('donorRegDesc', locale)}</Text>
             <Button
-              title="ডোনার হিসেবে নিবন্ধন করুন"
+              title={t('registerDonor', locale)}
               onPress={() => router.push('/(tabs)/profile')}
               style={{ marginTop: 16, width: '100%' }}
             />
@@ -200,7 +200,7 @@ export default function DonateScreen() {
                 onPress={() => setActiveTab('inbox')}
               >
                 <Text style={[styles.tabText, activeTab === 'inbox' && styles.tabTextActive]}>
-                  ইনবক্স
+                  {t('inbox', locale)}
                 </Text>
               </Pressable>
               <Pressable
@@ -208,7 +208,7 @@ export default function DonateScreen() {
                 onPress={() => setActiveTab('matching')}
               >
                 <Text style={[styles.tabText, activeTab === 'matching' && styles.tabTextActive]}>
-                  ম্যাচিং পোস্ট
+                  {t('matchingPosts', locale)}
                 </Text>
               </Pressable>
             </View>

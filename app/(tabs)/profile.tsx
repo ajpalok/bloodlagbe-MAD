@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/store/authStore';
-import { useSettingsStore } from '@/store/settingsStore';
+import { useSettingsStore, t } from '@/store/settingsStore';
 import { Colors } from '@/theme/colors';
 import type { DonorProfile, DonorQuestion, Session } from '@/types';
 
@@ -38,6 +38,7 @@ function ProfileEditModal({
   onClose: () => void;
 }) {
   const { user, refreshUser } = useAuthStore();
+  const { locale } = useSettingsStore();
   const [firstName, setFirstName] = useState(user?.first_name ?? '');
   const [lastName, setLastName] = useState(user?.last_name ?? '');
   const [gender, setGender] = useState(user?.gender ?? '');
@@ -54,13 +55,13 @@ function ProfileEditModal({
         date_of_birth: dob,
       });
       await refreshUser();
-      Alert.alert('সফল', 'প্রোফাইল আপডেট হয়েছে');
+      Alert.alert(t('success', locale), t('profileUpdated', locale));
       onClose();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'আপডেট করা যায়নি';
-      Alert.alert('ত্রুটি', msg);
+        t('profileUpdateFailed', locale);
+      Alert.alert(t('error', locale), msg);
     } finally {
       setLoading(false);
     }
@@ -70,20 +71,20 @@ function ProfileEditModal({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={styles.modal}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>প্রোফাইল সম্পাদনা</Text>
+          <Text style={styles.modalTitle}>{t('editProfile', locale)}</Text>
           <Pressable onPress={onClose}>
             <Text style={styles.closeBtn}>✕</Text>
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-          <Input label="প্রথম নাম" value={firstName} onChangeText={setFirstName} />
-          <Input label="শেষ নাম" value={lastName} onChangeText={setLastName} />
-          <Text style={styles.fieldLabel}>লিঙ্গ</Text>
+          <Input label={t('firstName', locale)} value={firstName} onChangeText={setFirstName} />
+          <Input label={t('lastName', locale)} value={lastName} onChangeText={setLastName} />
+          <Text style={styles.fieldLabel}>{t('gender', locale)}</Text>
           <View style={styles.genderRow}>
             {[
-              { value: 'male', label: 'পুরুষ' },
-              { value: 'female', label: 'মহিলা' },
-              { value: 'other', label: 'অন্যান্য' },
+              { value: 'male', label: t('male', locale) },
+              { value: 'female', label: t('female', locale) },
+              { value: 'other', label: t('other', locale) },
             ].map((g) => (
               <Pressable
                 key={g.value}
@@ -96,8 +97,8 @@ function ProfileEditModal({
               </Pressable>
             ))}
           </View>
-          <Input label="জন্ম তারিখ (YYYY-MM-DD)" value={dob} onChangeText={setDob} />
-          <Button title="সংরক্ষণ করুন" onPress={save} loading={loading} />
+          <Input label={t('dobFormat', locale)} value={dob} onChangeText={setDob} />
+          <Button title={t('saveChanges', locale)} onPress={save} loading={loading} />
         </ScrollView>
       </SafeAreaView>
     </Modal>
@@ -116,6 +117,7 @@ function DonorRegModal({
   onDone: () => void;
 }) {
   const { user } = useAuthStore();
+  const { locale } = useSettingsStore();
   const [bloodGroup, setBloodGroup] = useState('');
   const [questions, setQuestions] = useState<DonorQuestion[]>([]);
   const [responses, setResponses] = useState<Record<string, string>>({});
@@ -150,23 +152,23 @@ function DonorRegModal({
 
   async function handleRegister() {
     if (!bloodGroup) {
-      Alert.alert('ত্রুটি', 'রক্তের গ্রুপ নির্বাচন করুন।');
+      Alert.alert(t('error', locale), t('selectBloodGroup', locale));
       return;
     }
     setLoading(true);
     try {
       const result = await donorApi.register(bloodGroup, responses);
       if (!result.is_eligible) {
-        Alert.alert('অযোগ্য', 'আপনার উত্তরের ভিত্তিতে আপনি এখন রক্তদানের জন্য যোগ্য নন।');
+        Alert.alert(t('ineligibleTitle', locale), t('ineligibleMsg', locale));
       } else {
-        Alert.alert('সফল', 'ডোনার হিসেবে নিবন্ধিত হয়েছেন!');
+        Alert.alert(t('success', locale), t('donorRegistered', locale));
       }
       onDone();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'নিবন্ধন করা যায়নি';
-      Alert.alert('ত্রুটি', msg);
+        t('registrationFailed', locale);
+      Alert.alert(t('error', locale), msg);
     } finally {
       setLoading(false);
     }
@@ -176,13 +178,13 @@ function DonorRegModal({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={styles.modal}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>ডোনার নিবন্ধন</Text>
+          <Text style={styles.modalTitle}>{t('donorRegistration', locale)}</Text>
           <Pressable onPress={onClose}>
             <Text style={styles.closeBtn}>✕</Text>
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-          <Text style={styles.fieldLabel}>রক্তের গ্রুপ *</Text>
+          <Text style={styles.fieldLabel}>{t('bloodGroupLabel', locale)}</Text>
           <View style={styles.bloodGrid}>
             {BLOOD_GROUPS.map((bg) => (
               <Pressable
@@ -199,7 +201,7 @@ function DonorRegModal({
 
           {questions.length > 0 && (
             <>
-              <Text style={styles.sectionTitle}>স্ক্রিনিং প্রশ্ন</Text>
+              <Text style={styles.sectionTitle}>{t('screeningQuestions', locale)}</Text>
               {questions.map((q) => (
                 <Card key={q.id} style={styles.questionCard}>
                   <Text style={styles.questionText}>{q.question_bn}</Text>
@@ -233,7 +235,7 @@ function DonorRegModal({
           )}
 
           <Button
-            title="নিবন্ধন করুন"
+            title={t('registerBtn', locale)}
             onPress={handleRegister}
             loading={loading}
             disabled={!bloodGroup}
@@ -255,6 +257,7 @@ function AddContactModal({
   onClose: () => void;
   onDone: () => void;
 }) {
+  const { locale } = useSettingsStore();
   const [contactType, setContactType] = useState<'phone' | 'email'>('phone');
   const [contactValue, setContactValue] = useState('');
   const [verificationId, setVerificationId] = useState('');
@@ -272,8 +275,8 @@ function AddContactModal({
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'OTP পাঠানো যায়নি';
-      Alert.alert('ত্রুটি', msg);
+        t('otpSendFailed', locale);
+      Alert.alert(t('error', locale), msg);
     } finally {
       setLoading(false);
     }
@@ -284,7 +287,7 @@ function AddContactModal({
     setLoading(true);
     try {
       await authApi.verifyContact(verificationId, otpCode.trim());
-      Alert.alert('সফল', 'যোগাযোগ পদ্ধতি যোগ হয়েছে');
+      Alert.alert(t('success', locale), t('contactAdded', locale));
       onDone();
       // Reset
       setStep('input');
@@ -294,8 +297,8 @@ function AddContactModal({
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'যাচাই করা যায়নি';
-      Alert.alert('ত্রুটি', msg);
+        t('verifyFailed', locale);
+      Alert.alert(t('error', locale), msg);
     } finally {
       setLoading(false);
     }
@@ -305,7 +308,7 @@ function AddContactModal({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={styles.modal}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>যোগাযোগ যোগ করুন</Text>
+          <Text style={styles.modalTitle}>{t('addContactTitle', locale)}</Text>
           <Pressable onPress={onClose}>
             <Text style={styles.closeBtn}>✕</Text>
           </Pressable>
@@ -319,7 +322,7 @@ function AddContactModal({
                   onPress={() => setContactType('phone')}
                 >
                   <Text style={[styles.typeText, contactType === 'phone' && styles.typeTextSelected]}>
-                    📱 ফোন
+                    📱 {t('phone', locale)}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -327,35 +330,35 @@ function AddContactModal({
                   onPress={() => setContactType('email')}
                 >
                   <Text style={[styles.typeText, contactType === 'email' && styles.typeTextSelected]}>
-                    ✉️ ইমেইল
+                    ✉️ {t('emailLabel', locale)}
                   </Text>
                 </Pressable>
               </View>
               <Input
-                label={contactType === 'phone' ? 'ফোন নম্বর' : 'ইমেইল'}
+                label={contactType === 'phone' ? t('phoneLabel', locale) : t('emailLabel', locale)}
                 value={contactValue}
                 onChangeText={setContactValue}
                 placeholder={contactType === 'phone' ? '01XXXXXXXXX' : 'email@example.com'}
                 keyboardType={contactType === 'phone' ? 'phone-pad' : 'email-address'}
                 autoCapitalize="none"
               />
-              <Button title="OTP পাঠান" onPress={sendOtp} loading={loading} disabled={!contactValue.trim()} />
+              <Button title={t('sendOtpBtn', locale)} onPress={sendOtp} loading={loading} disabled={!contactValue.trim()} />
             </>
           ) : (
             <>
               <Text style={styles.verifyDesc}>
-                {contactValue} তে পাঠানো OTP কোড দিন
+                {contactValue} {t('otpSentTo', locale)}
               </Text>
               <Input
-                label="OTP কোড"
+                label={t('otpCode', locale)}
                 value={otpCode}
                 onChangeText={setOtpCode}
                 keyboardType="number-pad"
                 placeholder="123456"
               />
-              <Button title="যাচাই করুন" onPress={verify} loading={loading} disabled={!otpCode.trim()} />
+              <Button title={t('verify', locale)} onPress={verify} loading={loading} disabled={!otpCode.trim()} />
               <Button
-                title="← ফিরে যান"
+                title={`< ${t('back', locale)}`}
                 onPress={() => setStep('input')}
                 variant="ghost"
                 style={{ marginTop: 8 }}
@@ -377,6 +380,7 @@ function SessionManagerModal({
   visible: boolean;
   onClose: () => void;
 }) {
+  const { locale } = useSettingsStore();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -403,24 +407,24 @@ function SessionManagerModal({
       await authApi.terminateSession(id);
       setSessions((prev) => prev.filter((s) => s.id !== id));
     } catch {
-      Alert.alert('ত্রুটি', 'সেশন বন্ধ করা যায়নি');
+      Alert.alert(t('error', locale), t('sessionCloseFailed', locale));
     } finally {
       setActionLoading(null);
     }
   }
 
   async function terminateAll() {
-    Alert.alert('নিশ্চিত করুন', 'সব সেশন বন্ধ করতে চান?', [
-      { text: 'না', style: 'cancel' },
+    Alert.alert(t('confirmTitle', locale), t('confirmCloseAll', locale), [
+      { text: t('no', locale), style: 'cancel' },
       {
-        text: 'হ্যাঁ',
+        text: t('yes', locale),
         style: 'destructive',
         onPress: async () => {
           try {
             await authApi.terminateAllSessions();
             await loadSessions();
           } catch {
-            Alert.alert('ত্রুটি', 'সেশন বন্ধ করা যায়নি');
+            Alert.alert(t('error', locale), t('sessionCloseFailed', locale));
           }
         },
       },
@@ -431,7 +435,7 @@ function SessionManagerModal({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={styles.modal}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>সেশন ম্যানেজার</Text>
+          <Text style={styles.modalTitle}>{t('sessionManager', locale)}</Text>
           <Pressable onPress={onClose}>
             <Text style={styles.closeBtn}>✕</Text>
           </Pressable>
@@ -445,7 +449,7 @@ function SessionManagerModal({
                 <Card key={s.id} style={[styles.sessionCard, s.is_current && styles.sessionCurrent]}>
                   <View style={styles.sessionInfo}>
                     <Text style={styles.sessionDevice}>
-                      {s.device_name || 'অজানা ডিভাইস'}
+                      {s.device_name || t('unknownDevice', locale)}
                     </Text>
                     <Text style={styles.sessionIp}>{s.ip_address}</Text>
                     <Text style={styles.sessionTime}>
@@ -454,12 +458,12 @@ function SessionManagerModal({
                         : '—'}
                     </Text>
                     {s.is_current && (
-                      <Badge label="বর্তমান" variant="success" />
+                      <Badge label={t('currentSession', locale)} variant="success" />
                     )}
                   </View>
                   {!s.is_current && (
                     <Button
-                      title="বন্ধ করুন"
+                      title={t('closeSession', locale)}
                       onPress={() => terminate(s.id)}
                       loading={actionLoading === s.id}
                       variant="danger"
@@ -471,7 +475,7 @@ function SessionManagerModal({
 
               {sessions.filter((s) => !s.is_current).length > 1 && (
                 <Button
-                  title="অন্য সব সেশন বন্ধ করুন"
+                  title={t('closeAllSessions', locale)}
                   onPress={terminateAll}
                   variant="danger"
                   style={{ marginTop: 12 }}
@@ -488,6 +492,7 @@ function SessionManagerModal({
 // ── Donor Settings Section ───────────────────────────────────────────────────
 
 function DonorSettingsSection() {
+  const { locale } = useSettingsStore();
   const [profile, setProfile] = useState<DonorProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -514,7 +519,7 @@ function DonorSettingsSection() {
       await authApi.updateSettings({ [key]: value });
       setProfile((prev) => (prev ? { ...prev, [key]: value } : prev));
     } catch {
-      Alert.alert('ত্রুটি', 'সেটিং আপডেট করা যায়নি');
+      Alert.alert(t('error', locale), t('settingUpdateFailed', locale));
     } finally {
       setSaving(false);
     }
@@ -525,53 +530,53 @@ function DonorSettingsSection() {
 
   return (
     <Card style={styles.section}>
-      <Text style={styles.sectionTitle}>ডোনার তথ্য</Text>
+      <Text style={styles.sectionTitle}>{t('donorInfo', locale)}</Text>
 
       <View style={styles.donorInfoRow}>
         <BloodGroupBadge group={profile.blood_group} size="sm" />
         <Badge
-          label={profile.is_eligible ? '✓ যোগ্য' : '✗ অযোগ্য'}
+          label={profile.is_eligible ? t('eligible', locale) : t('ineligible', locale)}
           variant={profile.is_eligible ? 'success' : 'crimson'}
         />
         <Badge
-          label={profile.is_active ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+          label={profile.is_active ? t('activeDonor', locale) : t('inactiveDonor', locale)}
           variant={profile.is_active ? 'success' : 'muted'}
         />
       </View>
 
       {profile.total_donations > 0 && (
         <Text style={styles.donationCount}>
-          মোট রক্তদান: {profile.total_donations} বার
+          {t('totalDonationsLabel', locale)} {profile.total_donations} {t('timesUnit', locale)}
         </Text>
       )}
       {profile.last_donated_at && (
         <Text style={styles.lastDonation}>
-          সর্বশেষ: {new Date(profile.last_donated_at).toLocaleDateString('bn-BD')}
+          {t('lastDonatedLabel', locale)} {new Date(profile.last_donated_at).toLocaleDateString(locale === 'en' ? 'en-BD' : 'bn-BD')}
         </Text>
       )}
 
-      <Text style={styles.subsectionTitle}>গোপনীয়তা সেটিংস</Text>
+      <Text style={styles.subsectionTitle}>{t('privacySettings', locale)}</Text>
 
       <SettingToggle
-        label="প্রোফাইল পাবলিক"
+        label={t('profilePublic', locale)}
         value={profile.is_profile_public}
         onToggle={(v) => toggleSetting('is_profile_public', v)}
         disabled={saving}
       />
       <SettingToggle
-        label="রক্তের গ্রুপ দেখান"
+        label={t('showBloodGroup', locale)}
         value={profile.show_blood_group}
         onToggle={(v) => toggleSetting('show_blood_group', v)}
         disabled={saving}
       />
       <SettingToggle
-        label="অবস্থান দেখান"
+        label={t('showLocation', locale)}
         value={profile.show_location}
         onToggle={(v) => toggleSetting('show_location', v)}
         disabled={saving}
       />
       <SettingToggle
-        label="রক্তদানের সংখ্যা দেখান"
+        label={t('showDonationCount', locale)}
         value={profile.show_donation_count}
         onToggle={(v) => toggleSetting('show_donation_count', v)}
         disabled={saving}
@@ -619,10 +624,10 @@ export default function ProfileScreen() {
   const [removingContact, setRemovingContact] = useState<number | null>(null);
 
   async function handleRemoveContact(id: number) {
-    Alert.alert('নিশ্চিত করুন', 'এই যোগাযোগ পদ্ধতি মুছে ফেলতে চান?', [
-      { text: 'না', style: 'cancel' },
+    Alert.alert(t('confirmTitle', locale), t('removeContactConfirm', locale), [
+      { text: t('no', locale), style: 'cancel' },
       {
-        text: 'মুছুন',
+        text: t('deleteBtn', locale),
         style: 'destructive',
         onPress: async () => {
           setRemovingContact(id);
@@ -630,7 +635,7 @@ export default function ProfileScreen() {
             await authApi.removeContact(id);
             await refreshUser();
           } catch {
-            Alert.alert('ত্রুটি', 'মুছে ফেলা যায়নি');
+            Alert.alert(t('error', locale), t('profileUpdateFailed', locale));
           } finally {
             setRemovingContact(null);
           }
@@ -640,10 +645,10 @@ export default function ProfileScreen() {
   }
 
   async function handleLogout() {
-    Alert.alert('লগআউট', 'আপনি কি লগআউট করতে চান?', [
-      { text: 'না', style: 'cancel' },
+    Alert.alert(t('logout', locale), t('logoutConfirmMsg', locale), [
+      { text: t('no', locale), style: 'cancel' },
       {
-        text: 'হ্যাঁ',
+        text: t('yes', locale),
         style: 'destructive',
         onPress: async () => {
           await clearAuth();
@@ -656,7 +661,7 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
-        <LoginGate message="প্রোফাইল ও সেটিংস দেখতে লগইন করুন।">
+        <LoginGate message={t('profileLoginRequired', locale)}>
           <View />
         </LoginGate>
       </SafeAreaView>
@@ -675,7 +680,7 @@ export default function ProfileScreen() {
             {user.first_name} {user.last_name}
           </Text>
           <Button
-            title="সম্পাদনা"
+            title={t('edit', locale)}
             onPress={() => setShowEditProfile(true)}
             variant="outline"
             size="sm"
@@ -684,27 +689,27 @@ export default function ProfileScreen() {
 
         {/* Info card */}
         <Card style={styles.section}>
-          <InfoRow label="জেলা" value={user.district ?? '—'} />
-          <InfoRow label="বিভাগ" value={user.division ?? '—'} />
+          <InfoRow label={t('district', locale)} value={user.district ?? '—'} />
+          <InfoRow label={t('division', locale)} value={user.division ?? '—'} />
           <InfoRow
-            label="ডোনার"
-            value={user.is_donor ? '✓ হ্যাঁ' : '✗ না'}
+            label={t('donor', locale)}
+            value={user.is_donor ? t('isDonorYes', locale) : t('isDonorNo', locale)}
             valueColor={user.is_donor ? Colors.success : Colors.textMuted}
           />
           {user.gender && (
             <InfoRow
-              label="লিঙ্গ"
-              value={user.gender === 'male' ? 'পুরুষ' : user.gender === 'female' ? 'মহিলা' : 'অন্যান্য'}
+              label={t('gender', locale)}
+              value={user.gender === 'male' ? t('male', locale) : user.gender === 'female' ? t('female', locale) : t('other', locale)}
             />
           )}
-          {user.date_of_birth && <InfoRow label="জন্ম তারিখ" value={user.date_of_birth} />}
+          {user.date_of_birth && <InfoRow label={t('dob', locale)} value={user.date_of_birth} />}
         </Card>
 
         {/* Contact methods */}
         <Card style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>যোগাযোগ পদ্ধতি</Text>
-            <Button title="+ যোগ" onPress={() => setShowAddContact(true)} size="sm" variant="outline" />
+            <Text style={styles.sectionTitle}>{t('contactMethods', locale)}</Text>
+            <Button title={t('addContactBtn', locale)} onPress={() => setShowAddContact(true)} size="sm" variant="outline" />
           </View>
           {user.contact_methods?.length > 0 ? (
             user.contact_methods.map((c) => (
@@ -714,11 +719,11 @@ export default function ProfileScreen() {
                   <View>
                     <Text style={styles.contactValue}>{c.value}</Text>
                     <View style={{ flexDirection: 'row', gap: 6 }}>
-                      {c.is_primary && <Badge label="প্রাথমিক" variant="gold" />}
+                      {c.is_primary && <Badge label={t('primaryBadge', locale)} variant="gold" />}
                       {c.verified_at ? (
-                        <Badge label="✓ যাচাইকৃত" variant="success" />
+                        <Badge label={t('verifiedBadge', locale)} variant="success" />
                       ) : (
-                        <Badge label="অযাচাইকৃত" variant="warning" />
+                        <Badge label={t('unverifiedBadge', locale)} variant="warning" />
                       )}
                     </View>
                   </View>
@@ -735,7 +740,7 @@ export default function ProfileScreen() {
               </View>
             ))
           ) : (
-            <Text style={styles.emptyHint}>কোনো যোগাযোগ পদ্ধতি নেই</Text>
+            <Text style={styles.emptyHint}>{t('noContacts', locale)}</Text>
           )}
         </Card>
 
@@ -744,12 +749,10 @@ export default function ProfileScreen() {
           <DonorSettingsSection />
         ) : (
           <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>রক্তদাতা</Text>
-            <Text style={styles.donorDesc}>
-              রক্তদাতা হিসেবে নিবন্ধন করুন এবং রক্তের প্রয়োজনে পাশে থাকুন।
-            </Text>
+            <Text style={styles.sectionTitle}>{t('bloodDonor', locale)}</Text>
+            <Text style={styles.donorDesc}>{t('donorJoinDesc', locale)}</Text>
             <Button
-              title="ডোনার হিসেবে যোগ দিন"
+              title={t('joinAsDonor', locale)}
               onPress={() => setShowDonorReg(true)}
               variant="outline"
               size="sm"
@@ -760,7 +763,7 @@ export default function ProfileScreen() {
 
         {/* Language */}
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>ভাষা</Text>
+          <Text style={styles.sectionTitle}>{t('languageSection', locale)}</Text>
           <View style={styles.langRow}>
             <Pressable
               style={[styles.langBtn, locale === 'bn' && styles.langActive]}
@@ -779,16 +782,16 @@ export default function ProfileScreen() {
 
         {/* Sessions */}
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>সেশন</Text>
+          <Text style={styles.sectionTitle}>{t('sessions', locale)}</Text>
           <Button
-            title="সেশন ম্যানেজ করুন"
+            title={t('manageSessions', locale)}
             onPress={() => setShowSessions(true)}
             variant="outline"
             size="sm"
           />
         </Card>
 
-        <Button title="লগআউট" onPress={handleLogout} variant="danger" style={styles.logoutBtn} />
+        <Button title={t('logout', locale)} onPress={handleLogout} variant="danger" style={styles.logoutBtn} />
         <Text style={styles.version}>BloodLagbe Mobile v1.0</Text>
       </ScrollView>
 

@@ -15,16 +15,17 @@ import {
   Switch,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestsApi, bloodGroupOptions } from '@/api/requests';
 import { BloodGroupBadge } from '@/components/BloodGroupBadge';
+import { LocationPickerMap } from '@/components/LocationPickerMap';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAuthStore } from '@/store/authStore';
+import { useSettingsStore, t } from '@/store/settingsStore';
 import { Colors } from '@/theme/colors';
 import type { BloodRequestItem } from '@/types';
 
@@ -355,36 +356,21 @@ function CreateRequestModal({
             placeholderTextColor={Colors.textMuted}
           />
 
-          {/* Location picker */}
+          {/* Location picker — interactive map */}
           <FieldLabel label="হাসপাতালের অবস্থান" required error={errors.location} />
-          <TouchableOpacity
-            style={[styles.locationBtn, latitude !== null && styles.locationBtnPinned]}
-            onPress={pickLocation}
-            disabled={gettingLocation}
-            activeOpacity={0.75}
-          >
-            {gettingLocation ? (
-              <ActivityIndicator color={Colors.white} size="small" />
-            ) : latitude !== null ? (
-              <>
-                <Text style={styles.locationBtnIcon}>📍</Text>
-                <View style={styles.locationBtnTextWrap}>
-                  <Text style={styles.locationBtnTitle}>অবস্থান নির্বাচিত</Text>
-                  {locationLabel ? (
-                    <Text style={styles.locationBtnSub} numberOfLines={2}>{locationLabel}</Text>
-                  ) : (
-                    <Text style={styles.locationBtnSub}>{latitude.toFixed(5)}, {longitude!.toFixed(5)}</Text>
-                  )}
-                </View>
-                <Text style={styles.locationBtnChange}>পরিবর্তন</Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.locationBtnIcon}>🗺️</Text>
-                <Text style={styles.locationBtnTitle}>বর্তমান অবস্থান ব্যবহার করুন</Text>
-              </>
-            )}
-          </TouchableOpacity>
+          <LocationPickerMap
+            latitude={latitude}
+            longitude={longitude}
+            locationLabel={locationLabel}
+            onLocationChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+              setErrors(p => del(p, 'location'));
+            }}
+            onGpsPress={pickLocation}
+            gpsLoading={gettingLocation}
+            height={250}
+          />
 
           {/* ── Section 4: অতিরিক্ত তথ্য ── */}
           <SectionHeader title="অতিরিক্ত তথ্য" />
@@ -517,6 +503,7 @@ function MyRequestCard({
 
 export default function MyRequestsScreen() {
   const { isAuthenticated } = useAuthStore();
+  const { locale } = useSettingsStore();
   const [tab, setTab] = useState<'active' | 'completed'>('active');
   const [showNew, setShowNew] = useState(false);
   const [collectingId, setCollectingId] = useState<number | null>(null);
@@ -573,15 +560,15 @@ export default function MyRequestsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
-        <Text style={styles.pageTitle}>আমার পোস্ট</Text>
-        <Button title="+ নতুন" onPress={() => setShowNew(true)} size="sm" />
+        <Text style={styles.pageTitle}>{t('myRequests', locale)}</Text>
+        <Button title={t('newPost', locale)} onPress={() => setShowNew(true)} size="sm" />
       </View>
 
       <View style={styles.tabs}>
-        {(['active', 'completed'] as const).map(t2 => (
-          <Pressable key={t2} style={[styles.tab, tab === t2 && styles.tabActive]} onPress={() => setTab(t2)}>
-            <Text style={[styles.tabText, tab === t2 && styles.tabTextActive]}>
-              {t2 === 'active' ? 'সক্রিয়' : 'সম্পন্ন'}
+        {(['active', 'completed'] as const).map(tabKey => (
+          <Pressable key={tabKey} style={[styles.tab, tab === tabKey && styles.tabActive]} onPress={() => setTab(tabKey)}>
+            <Text style={[styles.tabText, tab === tabKey && styles.tabTextActive]}>
+              {tabKey === 'active' ? t('active', locale) : t('completed', locale)}
             </Text>
           </Pressable>
         ))}
@@ -730,29 +717,6 @@ const styles = StyleSheet.create({
   urgentText: { flex: 1 },
   urgentTitle:{ color: Colors.textPrimary, fontSize: 14, fontWeight: '600' },
   urgentHint: { color: Colors.textMuted, fontSize: 12, marginTop: 2 },
-
-  // Location button
-  locationBtn: {
-    marginTop: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: Colors.surfaceBorder,
-    backgroundColor: Colors.surface,
-  },
-  locationBtnPinned: {
-    borderStyle: 'solid',
-    borderColor: '#22c55e',
-    backgroundColor: 'rgba(34,197,94,0.08)',
-  },
-  locationBtnIcon:     { fontSize: 22 },
-  locationBtnTextWrap: { flex: 1 },
-  locationBtnTitle:    { color: Colors.textPrimary, fontSize: 14, fontWeight: '600' },
-  locationBtnSub:      { color: Colors.textMuted, fontSize: 11, marginTop: 2 },
-  locationBtnChange:   { color: Colors.gold, fontSize: 12, fontWeight: '600' },
 
   // Submit
   submitBtn: { marginTop: 28 },
