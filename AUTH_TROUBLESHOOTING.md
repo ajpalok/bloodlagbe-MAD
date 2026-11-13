@@ -165,7 +165,7 @@ X-Device-Token: encrypted_device_token_here
 ```env
 EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8000
 # For production:
-EXPO_PUBLIC_API_BASE_URL=https://bloodlagbe_api.2haas.com
+EXPO_PUBLIC_API_BASE_URL=https://bloodlagbe-api.2haas.com
 ```
 
 ### Backend Configuration
